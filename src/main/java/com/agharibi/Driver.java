@@ -30,7 +30,7 @@ public class Driver {
 
     private static Item newItem(String name, String description) {
         Item item = new Item();
-        
+
         item.setName(name);
         item.setDescription(description);
 
