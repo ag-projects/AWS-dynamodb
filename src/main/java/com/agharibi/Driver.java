@@ -1,6 +1,8 @@
 package com.agharibi;
 
+import com.agharibi.dao.CommentDao;
 import com.agharibi.dao.ItemDao;
+import com.agharibi.domain.Comment;
 import com.agharibi.domain.Item;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -18,8 +20,48 @@ public class Driver {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
                 .withRegion(Regions.US_EAST_1)
                 .build();
+
         // lowLevelDemo(client);
-        highLevelDemo(client);
+        // highLevelDemo(client);
+
+        Utils.createTables(client);
+        complexQueriesDemo(client);
+    }
+
+    private static void complexQueriesDemo(AmazonDynamoDB client) {
+        CommentDao commentDao = new CommentDao(client);
+        removeAll(commentDao);
+
+        Comment c1 = newComment("1", "Delivered on time", "10", 5);
+        Comment c2 = newComment("1", "Good Stuff", "10", 4);
+        Comment c3 = newComment("1", "Not bad", "10", 1);
+        Comment c4 = newComment("2", "It was OK", "10", 3);
+        Comment c5 = newComment("3", "Delivered just in time", "10", 5);
+
+        printComments(commentDao.getAll());
+
+    }
+
+    private static Comment newComment(String itemId, String msg, String userId, int rating) {
+        Comment comment = new Comment();
+        comment.setItemId(itemId);
+        comment.setMessage(msg);
+        comment.setUserId(userId);
+        comment.setRating(rating);
+
+        return comment;
+    }
+
+    private static void removeAll(CommentDao commentDao) {
+        for (Comment comment : commentDao.getAll()) {
+            commentDao.delete(comment.getItemId(), comment.getMessageId());
+        }
+    }
+
+    private static void printComments(List<Comment> comments) {
+        System.out.println(comments.stream()
+        .map(Comment::toString)
+        .collect(Collectors.joining("\n")));
     }
 
     private static void print(List<Item> all) {

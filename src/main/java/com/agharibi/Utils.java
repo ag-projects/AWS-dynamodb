@@ -17,6 +17,21 @@ public class Utils {
                 .generateCreateTableRequest(itemClass);
         createTableRequest.withProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
 
+        if(createTableRequest.getGlobalSecondaryIndexes() != null) {
+            for (GlobalSecondaryIndex gsi : createTableRequest.getGlobalSecondaryIndexes()) {
+                gsi.withProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
+                gsi.withProjection(new Projection().withProjectionType("ALL"));
+            }
+        }
+
+
+        if(createTableRequest.getLocalSecondaryIndexes() != null) {
+            for (LocalSecondaryIndex lsi : createTableRequest.getLocalSecondaryIndexes()) {
+                lsi.withProjection(new Projection().withProjectionType("ALL"));
+            }
+        }
+
+
         if (!exists(dynamoDB, createTableRequest)) {
             dynamoDB.createTable(createTableRequest);
         }
